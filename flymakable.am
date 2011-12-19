@@ -1,0 +1,60 @@
+# [PrefixAndPrimary]
+check_syntax_PPS=\
+lib_LTLIBRARIES \
+noinst_LTLIBRARIES \
+check_LTLIBRARIES \
+EXTRA_LTLIBRARIES \
+bin_PROGRAMS \
+sbin_PROGRAMS \
+libexec_PROGRAMS \
+noinst_PROGRAMS \
+check_PROGRAMS \
+EXTRA_PROGRAMS
+# 他？
+
+# [Candidate]
+check_syntax_CANDIDATES=\
+$(foreach c,$(check_syntax_PPS),$($(c)))
+
+# Candidate -> Target
+check_syntax_conv_TARGET=\
+$(subst -,_,$(subst .,_,$(1)))
+
+# [Target]
+check_syntax_conv_TARGETS=\
+$(foreach c,$(check_syntax_CANDIDATES),$(call check_syntax_conv_TARGET,$(c)))
+
+# C/CXX -> Target -> [Flag]
+check_syntax_retrieve_FLAGS=\
+$(foreach x,CPP $(1),$($(2)_$(x)FLAGS))
+
+# FlymakeSource -> OriginalSource
+check_syntax_CHKSOURCES=\
+$(subst _flymake.,.,$(CHK_SOURCES))
+
+# Target -> [Target]
+check_syntax_match_TARGET=\
+$(if $(filter $(check_syntax_CHKSOURCES),$($(1)_SOURCES)),$(1),)
+
+# [Target]
+check_syntax_filter_TARGET=\
+$(firstword $(foreach t,$(check_syntax_conv_TARGETS),$(call check_syntax_match_TARGET,$(t))))
+
+# C/CXX -> [Flag]
+check_syntax_find_FLAGS=\
+$(call check_syntax_retrieve_FLAGS,$(1),$(check_syntax_filter_TARGET))
+
+# C/CXX -> [Flag]
+check_syntax_ARGS=\
+$(call check_syntax_find_FLAGS,$(1)) \
+-fsyntax-only \
+$(CHK_SOURCES)
+
+check-syntax:
+	@case "$${CHK_SOURCES}" in \
+	  *.c)   $(COMPILE)    $(call check_syntax_ARGS,C)   ;; \
+	  *.cpp) $(CXXCOMPILE) $(call check_syntax_ARGS,CXX) ;; \
+	  *)     exit 1 ;; \
+	esac
+
+.PHONY: check-syntax
