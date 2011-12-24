@@ -4,5 +4,8 @@ SUBDIRS=\
 src
 
 EXTRA_DIST=\
+README.rst \
+README.jp.rst \
+LICENSE \
 cscope.files \
 cscope.sh
