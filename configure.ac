@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.68])
-AC_INIT(ccscope, 1.0.0, n.ohkawa@gmail.com, ccscope,
+AC_INIT(ccscope, 1.1.0, n.ohkawa@gmail.com, ccscope,
         https://github.com/notogawa/ccscope)
 AM_INIT_AUTOMAKE([foreign -W -Wall -Wno-portability])
 AC_CONFIG_SRCDIR([src/ccscope.cpp])

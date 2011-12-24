@@ -35,6 +35,7 @@
 #include <error.h>
 #include <sys/inotify.h>
 #include <pficommon/data/digest/md5.h>
+#include "config.h"
 #include "Inotify.hpp"
 
 namespace {
@@ -155,6 +156,28 @@ reload(TargetWatcher& tw, std::string listfile)
     load(tw, listfile);
 }
 
+void
+usage(std::ostream& os)
+{
+    os << "usage: ccscope [options]" << std::endl
+       << "Continuous Cscope index updater." << std::endl
+       << std::endl
+       << "option:" << std::endl
+       << "  -l [listfile]   source list file [./cscope.files]" << std::endl
+       << "  -r [runscript]  script file [./cscope.sh]" << std::endl
+       << "  -h              display this help" << std::endl
+       << "  -V              output version information" << std::endl;
+}
+
+void
+version(std::ostream& os)
+{
+    os << PACKAGE_STRING << std::endl
+       << "Copyright (c) 2011, Noriyuki OHKAWA a.k.a. notogawa." << std::endl
+       << PACKAGE_URL << std::endl
+       << std::endl;
+}
+
 } // anonymous namespace
 
 #define IGNORE_RESULT(X) if (X) {}
@@ -162,6 +185,39 @@ reload(TargetWatcher& tw, std::string listfile)
 int
 main(int argc, char* argv[])
 {
+    std::string listfile("./cscope.files");
+    std::string runfile("./cscope.sh");
+
+    int ch = 0;
+    extern char* optarg;
+    extern int optind;
+    while ((ch = getopt(argc, argv, "l:r:hV")) != -1)
+    {
+        switch (ch)
+        {
+        case 'l': {
+            listfile = optarg;
+        } break;
+        case 'r': {
+            runfile = optarg;
+        } break;
+        case 'h': {
+            usage(std::cout);
+            return EXIT_SUCCESS;
+        } break;
+        case 'V': {
+            version(std::cout);
+            return EXIT_SUCCESS;
+        } break;
+        default: {
+            usage(std::cerr);
+            return EXIT_FAILURE;
+        }
+        }
+    }
+    argc -= optind;
+    argv += optind;
+
     if (daemon(1, 0) < 0)
         error_at_line(EXIT_FAILURE, errno, __FILE__, __LINE__,
                       "failed daemonize");
@@ -171,9 +227,6 @@ main(int argc, char* argv[])
     if (SIG_IGN == signal(SIGINT, signal_handler))
         signal(SIGINT, SIG_IGN);
 
-    std::string listfile("./cscope.files");
-    std::string buildfile("./cscope.sh");
-
     TargetWatcher tw;
     load(tw, listfile);
     ListWatcher lw;
@@ -181,17 +234,12 @@ main(int argc, char* argv[])
 
     while (keep_running)
     {
-        if (lw.detect_update())
-        {
-            reload(tw, listfile);
-            IGNORE_RESULT(system(buildfile.c_str()));
-        }
-        if (tw.detect_update())
-        {
-            IGNORE_RESULT(system(buildfile.c_str()));
-        }
+        bool need_reload = lw.detect_update();
+        if (need_reload) reload(tw, listfile);
+        if (tw.detect_update() || need_reload)
+            IGNORE_RESULT(system(runfile.c_str()));
         sleep(1);
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

@@ -34,12 +34,18 @@
 #include <sys/epoll.h>
 #include <pficommon/concurrent/lock.h>
 
+namespace {
+
 struct runner
 {
     runner(Inotify& obj) : obj(obj) {}
     void operator () () { obj.run(); }
     Inotify& obj;
 };
+
+} // anonymous namespace
+
+
 
 Inotify::Inotify()
     : wd2path(), fd(inotify_init()), keep_running(true), thread(runner(*this))
