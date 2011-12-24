@@ -13,9 +13,5 @@ ccscope_SOURCES=\
 Inotify.cpp \
 ccscope.cpp
 
-ccscope_CXXFLAGS=\
-$(AM_CXXFLAGS) \
-@PTHREAD_CFLAGS@
-
 ccscope_LDFLAGS=\
 -lpficommon

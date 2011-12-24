@@ -2,7 +2,8 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.68])
-AC_INIT(ccscope, 0.1, n.ohkawa@gmail.com)
+AC_INIT(ccscope, 1.0.0, n.ohkawa@gmail.com, ccscope,
+        https://github.com/notogawa/ccscope)
 AM_INIT_AUTOMAKE([foreign -W -Wall -Wno-portability])
 AC_CONFIG_SRCDIR([src/ccscope.cpp])
 AC_CONFIG_HEADERS([config.h])
@@ -13,7 +14,6 @@ AC_PROG_CXX
 AC_PROG_CC
 
 # Checks for libraries.
-AX_PTHREAD
 
 # Checks for header files.
 
@@ -23,9 +23,7 @@ AC_TYPE_SIZE_T
 AC_TYPE_UINT32_T
 
 # Checks for library functions.
-AC_FUNC_MALLOC
 AC_FUNC_ERROR_AT_LINE
-AC_CHECK_FUNCS([memmove select])
 
 # Treat warnings as errors
 CFLAGS="${CFLAGS} -Wall -Wextra -Werror -ansi -pedantic"
