@@ -20,5 +20,8 @@ stamp-h*
 *.la
 .deps
 .libs
+src/ccscope
 
-cscope.*
+cscope.in.out
+cscope.out
+cscope.po.out
