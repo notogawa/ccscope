@@ -14,6 +14,13 @@ AC_PROG_CXX
 AC_PROG_CC
 
 # Checks for libraries.
+PKG_CHECK_MODULES(PFICOMMON, [pficommon >= 1.0],
+                  ccsope_cv_have_pficommon="yes",
+                  ccsope_cv_have_pficommon="no")
+if test "x$ccsope_cv_have_pficommon" = "xno"
+then
+  AC_MSG_ERROR([pficommon is not found])
+fi
 
 # Checks for header files.
 
