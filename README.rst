@@ -5,10 +5,12 @@ CCscope
 About
 =====
 
-This is a Continuous Cscope index updater.
+This is a Continuous Cscope_ index updater.
 
 Install
 =======
+
+CCscope depends on pficommon_. Install pficommon_ and type
 
 ::
 
@@ -37,6 +39,10 @@ Run. ::
   $ ccscope
 
 If you modify any file in "cscope.files",
-cscope index is automatically updated.
+Cscope_ index is automatically updated.
 If you modify "cscope.files" itself,
 "cscope.files" is automatically reloaded too.
+
+
+.. _Cscope: http://cscope.sourceforge.net/
+.. _pficommon: https://github.com/pfi/pficommon
