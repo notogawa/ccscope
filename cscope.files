@@ -1,3 +1,4 @@
+./config.h
 ./src/Inotify.cpp
 ./src/Inotify.hpp
 ./src/ccscope.cpp

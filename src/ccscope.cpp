@@ -32,9 +32,13 @@
 #include <fstream>
 #include <sstream>
 #include <csignal>
+#include <vector>
 #include <error.h>
+#include <cerrno>
 #include <sys/inotify.h>
 #include <pficommon/data/digest/md5.h>
+#include <pficommon/concurrent/mutex.h>
+#include <pficommon/concurrent/lock.h>
 #include "config.h"
 #include "Inotify.hpp"
 
@@ -53,7 +57,7 @@ class TargetWatcher
 {
 public:
     TargetWatcher()
-        : path2md5(), update(false) {}
+        : path2md5(), updates() {}
     virtual ~TargetWatcher() throw () {}
 
     virtual int
@@ -64,10 +68,11 @@ public:
         return Inotify::watch(pathname, mask);
     }
 
-    bool
+    std::vector< std::string >
     detect_update() {
-        bool result = update;
-        update = false;
+        pfi::concurrent::scoped_lock lock(mutex);
+        std::vector< std::string > result(updates);
+        updates.clear();
         return result;
     }
 
@@ -88,7 +93,8 @@ protected:
         if (path2md5[pathname] != md5)
         {
             path2md5[pathname] = md5;
-            update = true;
+            pfi::concurrent::scoped_lock lock(mutex);
+            updates.push_back(pathname);
         }
     }
 
@@ -105,7 +111,8 @@ private:
     }
 
     std::map< std::string, std::string > path2md5;
-    bool update;
+    pfi::concurrent::r_mutex mutex;
+    std::vector< std::string > updates;
 };
 
 class ListWatcher
@@ -236,8 +243,14 @@ main(int argc, char* argv[])
     {
         bool need_reload = lw.detect_update();
         if (need_reload) reload(tw, listfile);
-        if (tw.detect_update() || need_reload)
-            IGNORE_RESULT(system(runfile.c_str()));
+        std::vector< std::string > updated(tw.detect_update());
+        if (!updated.empty() || need_reload)
+        {
+            std::string cmd(runfile);
+            for (std::vector< std::string >::const_iterator i = updated.begin();
+                 i != updated.end(); ++i) cmd += " "+*i;
+            IGNORE_RESULT(system(cmd.c_str()));
+        }
         sleep(1);
     }
 

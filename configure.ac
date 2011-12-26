@@ -34,7 +34,7 @@ AC_FUNC_ERROR_AT_LINE
 
 # Treat warnings as errors
 CFLAGS="${CFLAGS} -Wall -Wextra -Werror -ansi -pedantic"
-CXXFLAGS="${CXXFLAGS} -Wall -Wextra -Werror -std=c++0x -pedantic"
+CXXFLAGS="${CXXFLAGS} -Wall -Wextra -Werror -pedantic"
 
 # Check for -Wno-error=unused-parameter
 AC_CACHE_CHECK([for gcc -Wno-error=unused-parameter support],
